@@ -15,10 +15,10 @@ const reviewRoutes = require('./routes/reviews');
 const helmet = require("helmet")
 const MongoStore = require('connect-mongo');
 
-require('dotenv').config(); // dotenvを使って環境変数を読み込む
+// require('dotenv').config(); // dotenvを使って環境変数を読み込む
 
-// const dbUrl = process.env.DB_URL;
-dbUrl = "mongodb://localhost:27017/yelp-camp"
+
+dbUrl =process.env.DB_UR|| "mongodb://localhost:27017/yelp-camp"
 
 mongoose.connect(dbUrl,
     {
@@ -81,7 +81,7 @@ app.use(helmet({
 }))
 
 app.use((req, res, next) => {
-    res.locals.currentUser = req.user;
+    res.locals.currentUser = req.user || null;
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     next();
