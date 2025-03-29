@@ -18,7 +18,7 @@ const MongoStore = require('connect-mongo');
 // require('dotenv').config(); // dotenvを使って環境変数を読み込む
 
 
-dbUrl =process.env.DB_UR|| "mongodb://localhost:27017/yelp-camp"
+dbUrl =process.env.DB_URL|| "mongodb://localhost:27017/yelp-camp"
 mongoose.connect(dbUrl,
     {
         useNewUrlParser: true,
