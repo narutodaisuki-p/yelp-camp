@@ -97,11 +97,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use((req, res, next) => {
-    console.log('セッション:', req.session);
-    console.log('フラッシュメッセージ:', req.flash());
-    next();
-});
+
 
 
 
@@ -115,15 +111,7 @@ app.get('/', (req, res) => {
     
     res.render('home');
 });
-app.get('/test-flash', (req, res) => {
-    req.flash('success', 'フラッシュメッセージが動作しています！');
-    res.redirect('/show-flash');
-});
 
-app.get('/show-flash', (req, res) => {
-    const messages = req.flash('success');
-    res.send(messages);
-});
 
 app.use('/', userRoutes);
 app.use('/campgrounds', campgroundRoutes);
