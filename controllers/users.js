@@ -1,5 +1,6 @@
 const User = require('../models/user');
 
+
 module.exports.renderRegister = (req, res) => {
     res.render('users/register');
 }
@@ -32,8 +33,12 @@ module.exports.login = (req, res) => {
     res.redirect(redirectUrl);
 }
 
-module.exports.logout = (req, res) => {
-    req.logout();
-    req.flash('success', 'ログアウトしました');
-    res.redirect('/campgrounds');
-}
+module.exports.logout = (req, res,next) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return next(err); // エラーハンドリング
+        }
+        req.flash('success', 'ログアウトしました');
+        res.redirect('/campgrounds');
+    });
+};

@@ -15,14 +15,13 @@ const reviewRoutes = require('./routes/reviews');
 const helmet = require("helmet")
 const MongoStore = require('connect-mongo');
 
-// require('dotenv').config(); // dotenvを使って環境変数を読み込む
+require('dotenv').config(); // dotenvを使って環境変数を読み込む
 
 
 dbUrl =process.env.DB_URL|| "mongodb://localhost:27017/yelp-camp"
 mongoose.connect(dbUrl,
     {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
+        
         
     })
     .then(() => {
@@ -61,7 +60,7 @@ const sessionConfig = {
     resave: false,
     saveUninitialized: true,
     cookie: {
-        httpOnly: false,
+        httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24 * 7
     }
 };
@@ -69,25 +68,61 @@ app.use(session(sessionConfig));
 
 app.use(passport.initialize());
 app.use(passport.session());
-passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
 
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser((user, done) => {
+    
+    process.nextTick(() => {
+        done(null, user.id);
+        
+    });
+});
+
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await User.findById(id);
+        done(null, user);
+    } catch (err) {
+        done(err);
+    }
+});
 app.use(flash());
-app.use(helmet({
-    contentSecurityPolicy:false
-}))
 
 app.use((req, res, next) => {
-    res.locals.currentUser = req.user || null;
+   
+    res.locals.currentUser = req.user 
+    
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     next();
 });
 
+app.use((req, res, next) => {
+    console.log('セッション:', req.session);
+    console.log('フラッシュメッセージ:', req.flash());
+    next();
+});
+
+
+
+
+// app.use(helmet({
+//     contentSecurityPolicy:false
+// }))
+
+
 app.get('/', (req, res) => {
     
     res.render('home');
+});
+app.get('/test-flash', (req, res) => {
+    req.flash('success', 'フラッシュメッセージが動作しています！');
+    res.redirect('/show-flash');
+});
+
+app.get('/show-flash', (req, res) => {
+    const messages = req.flash('success');
+    res.send(messages);
 });
 
 app.use('/', userRoutes);
@@ -101,6 +136,7 @@ app.all('*', (req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
+    console.log(err)
     const { statusCode = 500 } = err;
     if (!err.message) {
         err.message = '問題が起きました'
